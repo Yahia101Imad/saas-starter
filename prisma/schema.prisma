@@ -99,7 +99,7 @@ model Member {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId         String
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role           String       @default("member")
+  role           Role         @default(MEMBER)
   createdAt      DateTime
 
   @@index([organizationId])
@@ -112,7 +112,7 @@ model Invitation {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   email          String
-  role           String?
+  role           Role?
   status         String       @default("pending")
   expiresAt      DateTime
   createdAt      DateTime     @default(now())
@@ -150,7 +150,7 @@ model Subscription {
   planId          String
   plan            Plan          @relation(fields: [planId], references: [id])
 
-  status          String        @default("active")
+  status SubscriptionStatus @default(ACTIVE)
 
   currentPeriodStart DateTime
   currentPeriodEnd   DateTime
@@ -171,12 +171,39 @@ model UserSettings {
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  theme     String   @default("system")
-  language  String   @default("en")
+  theme Theme @default(SYSTEM)
+  language Language   @default(EN)
   timezone  String   @default("UTC")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("user_settings")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  TRIALING
+  INCOMPLETE
+  EXPIRED
+}
+
+enum Theme {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+enum Language {
+  EN
+  AR
+  FR
 }
