@@ -16,6 +16,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signUpSchema, type SignUpFormData } from "@/lib/validations/auth";
 import { authClient } from "@/lib/auth-client";
 
+import { ForgotPasswordLink } from "@/components/auth/forgot-password-link";
+
 // TODO:
 // Use shadcn form (clean UI)
 // npx shadcn@latest add form
@@ -100,6 +102,7 @@ export default function SignUpPage() {
               {form.formState.errors.password.message}
             </p>
           )}
+          <ForgotPasswordLink />
         </div>
 
         <div className="space-y-2">
