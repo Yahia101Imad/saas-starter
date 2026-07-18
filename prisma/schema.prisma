@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "../lib/generated/prisma"
 }
 
 datasource db {
@@ -8,39 +8,35 @@ datasource db {
 }
 
 model User {
-  id            String       @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String
-  email         String
-  emailVerified Boolean      @default(false)
+  email         String        @unique
+  emailVerified Boolean       @default(false)
   image         String?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  accounts      Account[]
+  invitations   Invitation[]
+  members       Member[]
+  sessions      Session[]
   settings      UserSettings?
 
-  sessions      Session[]
-  accounts      Account[]
-  members       Member[]
-  invitations   Invitation[]
-
-  @@unique([email])
   @@map("user")
 }
 
 model Session {
-  id                   String   @id @default(cuid())
+  id                   String        @id @default(cuid())
   expiresAt            DateTime
-  token                String
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  token                String        @unique
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
   ipAddress            String?
   userAgent            String?
   userId               String
-  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   activeOrganizationId String?
-  activeOrganization   Organization? @relation(fields: [activeOrganizationId], references: [id], onDelete: SetNull)
+  activeOrganization   Organization? @relation(fields: [activeOrganizationId], references: [id])
+  user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@index([userId])
   @@map("session")
 }
@@ -50,7 +46,6 @@ model Account {
   accountId             String
   providerId            String
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -60,6 +55,7 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("account")
@@ -78,29 +74,28 @@ model Verification {
 }
 
 model Organization {
-  id          String       @id @default(cuid())
-  name        String
-  slug        String
-  logo        String?
-  createdAt   DateTime
-  metadata    String?
-  members     Member[]
-  invitations Invitation[]
+  id            String         @id @default(cuid())
+  name          String
+  slug          String         @unique
+  logo          String?
+  createdAt     DateTime
+  metadata      String?
+  invitations   Invitation[]
+  members       Member[]
+  sessions      Session[]
   subscriptions Subscription[]
-  sessions    Session[]
 
-  @@unique([slug])
   @@map("organization")
 }
 
 model Member {
   id             String       @id @default(cuid())
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId         String
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role           Role         @default(MEMBER)
   createdAt      DateTime
+  role           Role         @default(MEMBER)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([organizationId])
   @@index([userId])
@@ -110,14 +105,14 @@ model Member {
 model Invitation {
   id             String       @id @default(cuid())
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   email          String
-  role           Role?
   status         String       @default("pending")
   expiresAt      DateTime
   createdAt      DateTime     @default(now())
   inviterId      String
+  role           Role?
   user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId])
   @@index([email])
@@ -132,33 +127,25 @@ model Plan {
   currency      String         @default("USD")
   interval      String
   active        Boolean        @default(true)
-
-  subscriptions Subscription[]
-
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  subscriptions Subscription[]
 
   @@map("plan")
 }
 
 model Subscription {
-  id              String        @id @default(cuid())
-
-  organizationId  String
-  organization    Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  planId          String
-  plan            Plan          @relation(fields: [planId], references: [id])
-
-  status SubscriptionStatus @default(ACTIVE)
-
+  id                 String             @id @default(cuid())
+  organizationId     String
+  planId             String
   currentPeriodStart DateTime
   currentPeriodEnd   DateTime
-
-  cancelAtPeriodEnd Boolean     @default(false)
-
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  cancelAtPeriodEnd  Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  status             SubscriptionStatus @default(ACTIVE)
+  organization       Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plan               Plan               @relation(fields: [planId], references: [id])
 
   @@index([organizationId])
   @@index([planId])
@@ -167,16 +154,13 @@ model Subscription {
 
 model UserSettings {
   id        String   @id @default(cuid())
-
   userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  theme Theme @default(SYSTEM)
-  language Language   @default(EN)
   timezone  String   @default("UTC")
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  theme     Theme    @default(SYSTEM)
+  language  Language @default(EN)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")
 }

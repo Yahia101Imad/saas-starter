@@ -14,6 +14,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, type SignInFormData } from "@/lib/validations/auth";
+import { authClient } from "@/lib/auth-client";
 
 // TODO:
 // Use shadcn form (clean UI)
@@ -28,8 +29,18 @@ export default function SignInPage() {
     },
   });
 
-  const onSubmit = (values: SignInFormData) => {
-    console.log(values);
+  const onSubmit = async (values: SignInFormData) => {
+    const { data, error } = await authClient.signIn.email({
+      email: values.email,
+      password: values.password,
+    });
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    console.log(data);
   };
   return (
     <AuthCard title="Welcome back" description="Sign in to your account">

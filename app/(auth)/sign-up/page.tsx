@@ -14,6 +14,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signUpSchema, type SignUpFormData } from "@/lib/validations/auth";
+import { authClient } from "@/lib/auth-client";
 
 // TODO:
 // Use shadcn form (clean UI)
@@ -31,7 +32,18 @@ export default function SignUpPage() {
   });
 
   const onSubmit = async (values: SignUpFormData) => {
-    console.log(values);
+    const { data, error } = await authClient.signUp.email({
+      name: values.name,
+      email: values.email,
+      password: values.password,
+    });
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    console.log(data);
   };
   return (
     <AuthCard
