@@ -1,6 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
+import {
+  ForgotPasswordFormData,
+  forgotPasswordSchema,
+} from "@/lib/validations/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 // TODO:
 // add "Resend" later, as Mail Provider
@@ -8,6 +17,26 @@ import Link from "next/link";
 // user add email => click send => click link in mail of reset password page.
 
 export default function ForgotPasswordPage() {
+  const form = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
+
+  const onSubmit = async (values: ForgotPasswordFormData) => {
+    const { data, error } = await authClient.forgetPassword({
+      email: values.email,
+      redirectTo: "/reset-password",
+    });
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    console.log(data);
+  };
   return (
     <div className="mx-auto flex min-h-screen max-w-md items-center justify-center px-6">
       <div className="w-full space-y-6">
@@ -19,24 +48,25 @@ export default function ForgotPasswordPage() {
           </p>
         </div>
 
-        <form className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email">Email</label>
 
-            <input
+            <Input
               id="email"
               type="email"
               placeholder="you@example.com"
+              {...form.register("email")}
               className="border-input bg-background w-full rounded-md border px-3 py-2"
             />
           </div>
 
-          <button
+          <Button
             type="submit"
             className="bg-primary text-primary-foreground w-full rounded-md py-2"
           >
             Send reset link
-          </button>
+          </Button>
         </form>
 
         <p className="text-center text-sm">
