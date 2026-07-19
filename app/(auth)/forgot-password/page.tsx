@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
   });
 
   const onSubmit = async (values: ForgotPasswordFormData) => {
-    const { data, error } = await authClient.forgetPassword({
+    const { data, error } = await authClient.requestPasswordReset({
       email: values.email,
       redirectTo: "/reset-password",
     });
@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
       return;
     }
 
-    console.log(data);
+    console.log(data, values);
   };
   return (
     <div className="mx-auto flex min-h-screen max-w-md items-center justify-center px-6">
@@ -59,13 +59,15 @@ export default function ForgotPasswordPage() {
               {...form.register("email")}
               className="border-input bg-background w-full rounded-md border px-3 py-2"
             />
+            {form.formState.errors.email && (
+              <p className="text-destructive text-sm">
+                {form.formState.errors.email.message}
+              </p>
+            )}
           </div>
 
-          <Button
-            type="submit"
-            className="bg-primary text-primary-foreground w-full rounded-md py-2"
-          >
-            Send reset link
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? "Sending..." : "Send reset link"}
           </Button>
         </form>
 
