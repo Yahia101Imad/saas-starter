@@ -14,7 +14,13 @@ import {
   type ResetPasswordFormData,
 } from "@/lib/validations/auth";
 
+import { useSearchParams } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+
 export default function ResetPasswordPage() {
+  const router = useRouter();
+
   const form = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
@@ -23,11 +29,25 @@ export default function ResetPasswordPage() {
     },
   });
 
-  const onSubmit = async (values: ResetPasswordFormData) => {
-    console.log(values);
+  const searchParams = useSearchParams();
 
-    // TODO:
-    // await authClient.resetPassword(...)
+  const token = searchParams.get("token");
+
+  const onSubmit = async (values: ResetPasswordFormData) => {
+    if (!token) return;
+
+    const { data, error } = await authClient.resetPassword({
+      newPassword: values.password,
+      token,
+    });
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    console.log(data);
+    router.push("/sign-in");
   };
 
   return (
@@ -70,7 +90,9 @@ export default function ResetPasswordPage() {
           )}
         </div>
 
-        <Button className="w-full">Reset password</Button>
+        <Button className="w-full" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? "Resetting..." : "Reset password"}
+        </Button>
       </form>
     </AuthCard>
   );
