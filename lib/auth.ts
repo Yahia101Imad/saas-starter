@@ -4,7 +4,6 @@ import { PrismaClient } from "@/lib/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { organization } from "better-auth/plugins";
 import { sendEmail } from "@/lib/email/send-email";
-// import { resend } from "@/lib/email/resend";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL!,
@@ -38,16 +37,40 @@ export const auth = betterAuth({
     },
   },
 
+  user: {
+    changeEmail: {
+      enabled: false,
+      sendChangeEmailVerification: async ({
+        user,
+        newEmail,
+        url,
+      }: {
+        user: { email: string };
+        newEmail: string;
+        url: string;
+      }) => {
+        console.log("=== SEND CHANGE EMAIL VERIFICATION ===");
+        console.log("to:", newEmail);
+        console.log("url:", url);
+        await sendEmail({
+          to: newEmail,
+          subject: "Verify your new email address",
+          html: `Click the link below to confirm your new email address:<br/><br/><a href="${url}">${url}</a>`,
+        });
+      },
+    },
+  },
+
   emailVerification: {
     sendOnSignUp: true,
 
-    // sendVerificationEmail: async ({ user, url }) => {
-    //   await sendEmail({
-    //     to: user.email,
-    //     subject: "Verify your email",
-    //     html: `Click the link below to verify your email:\n\n${url}`,
-    //   });
-    // },
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Verify your email",
+        html: `Click the link below to verify your email address:<br/><br/><a href="${url}">${url}</a>`,
+      });
+    },
   },
 
   socialProviders: {

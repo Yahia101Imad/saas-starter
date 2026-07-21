@@ -1,12 +1,12 @@
-import { LogoutButton } from "@/components/auth/logout-button";
+import { getSession } from "@/lib/session";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const session = await getSession();
+
   return (
-    <div className="space-y-2">
-      <h1>Dashboard</h1>
-      <p>Welcome to your dashboard.</p>
-
-      <LogoutButton />
+    <div className="space-y-1">
+      <h1>Hello, {session?.user.name}</h1>
+      <p className="text-muted-foreground">{session?.user.email}</p>
     </div>
   );
 }
