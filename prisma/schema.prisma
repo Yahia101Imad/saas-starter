@@ -127,6 +127,7 @@ model Plan {
   currency      String         @default("USD")
   interval      String
   active        Boolean        @default(true)
+  paddlePriceId String         @unique
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   subscriptions Subscription[]
@@ -135,17 +136,19 @@ model Plan {
 }
 
 model Subscription {
-  id                 String             @id @default(cuid())
-  organizationId     String
-  planId             String
-  currentPeriodStart DateTime
-  currentPeriodEnd   DateTime
-  cancelAtPeriodEnd  Boolean            @default(false)
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  status             SubscriptionStatus @default(ACTIVE)
-  organization       Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  plan               Plan               @relation(fields: [planId], references: [id])
+  id                   String             @id @default(cuid())
+  organizationId       String
+  planId               String
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  status               SubscriptionStatus @default(ACTIVE)
+  paddleSubscriptionId String?            @unique
+  paddleCustomerId     String?
+  organization         Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plan                 Plan               @relation(fields: [planId], references: [id])
 
   @@index([organizationId])
   @@index([planId])
