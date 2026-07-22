@@ -5,7 +5,6 @@ import { prisma } from "@/lib/db";
 export async function POST(req: NextRequest) {
   const signature = req.headers.get("paddle-signature") ?? "";
   const rawBody = await req.text();
-
   const webhookSecret = process.env.PADDLE_WEBHOOK_SECRET!;
 
   let eventData;
@@ -36,11 +35,9 @@ export async function POST(req: NextRequest) {
         where: { paddlePriceId: sub.items[0]?.price?.id },
       });
 
-      if (!plan) break;
+      const userId = sub.customData?.userId as string | undefined;
 
-      const organizationId = sub.customData?.organizationId as
-        string | undefined;
-      if (!organizationId) break;
+      if (!plan || !userId) break;
 
       await prisma.subscription.upsert({
         where: { paddleSubscriptionId: sub.id },
@@ -58,7 +55,7 @@ export async function POST(req: NextRequest) {
         create: {
           paddleSubscriptionId: sub.id,
           paddleCustomerId: sub.customerId,
-          organizationId,
+          userId,
           planId: plan.id,
           status: mapPaddleStatus(sub.status),
           currentPeriodStart: new Date(
