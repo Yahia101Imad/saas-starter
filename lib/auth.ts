@@ -2,7 +2,6 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { PrismaClient } from "@/lib/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { organization } from "better-auth/plugins";
 import { sendEmail } from "@/lib/email/send-email";
 
 const adapter = new PrismaPg({
@@ -79,6 +78,4 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
   },
-
-  plugins: [organization()],
 });
