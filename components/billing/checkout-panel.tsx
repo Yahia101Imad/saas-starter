@@ -40,7 +40,8 @@ export function CheckoutPanel({
         });
 
         setIsLoading(false);
-      } catch {
+      } catch (err) {
+        console.error("Paddle checkout error:", err);
         setError("Failed to load checkout. Please try again.");
         setIsLoading(false);
       }
