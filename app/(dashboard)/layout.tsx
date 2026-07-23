@@ -16,7 +16,11 @@ export default async function DashboardLayout({
 
       <div className="flex flex-1 flex-col">
         <header className="flex h-16 items-center justify-end border-b px-6">
-          <UserMenu name={session.user.name} email={session.user.email} />
+          <UserMenu
+            name={session.user.name}
+            email={session.user.email}
+            image={session.user.image}
+          />
         </header>
 
         <main className="flex-1 p-6">{children}</main>

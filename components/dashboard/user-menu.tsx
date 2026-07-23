@@ -9,23 +9,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { useLogout } from "@/hooks/use-logout";
 
 interface UserMenuProps {
   name: string;
   email: string;
+  image?: string | null;
 }
 
-export function UserMenu({ name, email }: UserMenuProps) {
+export function UserMenu({ name, email, image }: UserMenuProps) {
   const { logout, isLoading } = useLogout();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="focus-visible:ring-ring flex items-center gap-2 rounded-full outline-none focus-visible:ring-2">
-          <span className="bg-primary text-primary-foreground flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium">
-            {name.charAt(0).toUpperCase()}
-          </span>
+          <UserAvatar name={name} image={image} size="sm" />
         </button>
       </DropdownMenuTrigger>
 
