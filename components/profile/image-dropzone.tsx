@@ -2,6 +2,7 @@
 
 import { useRef, useState, type DragEvent } from "react";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import { ImageCropModal } from "./image-crop-modal";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
@@ -23,8 +24,9 @@ export function ImageDropzone({ name, currentImage }: ImageDropzoneProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null | undefined>(
     currentImage,
   );
+  const [pendingImageSrc, setPendingImageSrc] = useState<string | null>(null);
 
-  const uploadFile = async (file: File) => {
+  const validateAndRead = (file: File) => {
     setError(null);
 
     if (!file.type.startsWith("image/")) {
@@ -35,16 +37,26 @@ export function ImageDropzone({ name, currentImage }: ImageDropzoneProps) {
       setError(`Image must be smaller than ${MAX_FILE_SIZE_MB}MB`);
       return;
     }
+
+    const reader = new FileReader();
+    reader.onload = () => setPendingImageSrc(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const uploadCroppedImage = async (blob: Blob) => {
+    setPendingImageSrc(null);
+
     if (!CLOUD_NAME || !UPLOAD_PRESET) {
       setError("Image upload is not configured");
       return;
     }
 
     setIsUploading(true);
+    setError(null);
 
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", blob, "avatar.jpg");
       formData.append("upload_preset", UPLOAD_PRESET);
 
       const res = await fetch(
@@ -52,9 +64,7 @@ export function ImageDropzone({ name, currentImage }: ImageDropzoneProps) {
         { method: "POST", body: formData },
       );
 
-      if (!res.ok) {
-        throw new Error("Upload failed");
-      }
+      if (!res.ok) throw new Error("Upload failed");
 
       const data = await res.json();
       const secureUrl = data.secure_url as string;
@@ -80,51 +90,62 @@ export function ImageDropzone({ name, currentImage }: ImageDropzoneProps) {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
-    if (file) uploadFile(file);
+    if (file) validateAndRead(file);
   };
 
   return (
-    <div className="space-y-2">
-      <div
-        onClick={() => inputRef.current?.click()}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setIsDragging(true);
-        }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={handleDrop}
-        className={cn(
-          "flex cursor-pointer items-center gap-4 rounded-md border-2 border-dashed p-4 transition-colors",
-          isDragging ? "border-primary bg-accent" : "border-border",
-          isUploading && "pointer-events-none opacity-60",
-        )}
-      >
-        <UserAvatar name={name} image={previewUrl} size="lg" />
+    <>
+      <div className="space-y-2">
+        <div
+          onClick={() => inputRef.current?.click()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+          className={cn(
+            "flex cursor-pointer items-center gap-4 rounded-md border-2 border-dashed p-4 transition-colors",
+            isDragging ? "border-primary bg-accent" : "border-border",
+            isUploading && "pointer-events-none opacity-60",
+          )}
+        >
+          <UserAvatar name={name} image={previewUrl} size="lg" />
 
-        <div className="text-sm">
-          <p className="font-medium">
-            {isUploading
-              ? "Uploading..."
-              : "Drag & drop an image, or click to browse"}
-          </p>
-          <p className="text-muted-foreground">
-            PNG or JPG, up to {MAX_FILE_SIZE_MB}MB
-          </p>
+          <div className="text-sm">
+            <p className="font-medium">
+              {isUploading
+                ? "Uploading..."
+                : "Drag & drop an image, or click to browse"}
+            </p>
+            <p className="text-muted-foreground">
+              PNG or JPG, up to {MAX_FILE_SIZE_MB}MB
+            </p>
+          </div>
+
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) validateAndRead(file);
+              e.target.value = "";
+            }}
+          />
         </div>
 
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) uploadFile(file);
-          }}
-        />
+        {error && <p className="text-destructive text-sm">{error}</p>}
       </div>
 
-      {error && <p className="text-destructive text-sm">{error}</p>}
-    </div>
+      {pendingImageSrc && (
+        <ImageCropModal
+          imageSrc={pendingImageSrc}
+          onCancel={() => setPendingImageSrc(null)}
+          onConfirm={uploadCroppedImage}
+        />
+      )}
+    </>
   );
 }
