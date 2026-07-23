@@ -1,10 +1,16 @@
 "use client";
 
 import { useRef, useState, type DragEvent } from "react";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { ImageCropModal } from "./image-crop-modal";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import {
+  saveImagePublicId,
+  removeProfileImage,
+} from "@/app/(dashboard)/dashboard/profile/actions";
 
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
@@ -20,6 +26,7 @@ export function ImageDropzone({ name, currentImage }: ImageDropzoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null | undefined>(
     currentImage,
@@ -68,6 +75,7 @@ export function ImageDropzone({ name, currentImage }: ImageDropzoneProps) {
 
       const data = await res.json();
       const secureUrl = data.secure_url as string;
+      const publicId = data.public_id as string;
 
       const { error: updateError } = await authClient.updateUser({
         image: secureUrl,
@@ -78,11 +86,31 @@ export function ImageDropzone({ name, currentImage }: ImageDropzoneProps) {
         return;
       }
 
+      await saveImagePublicId(publicId);
       setPreviewUrl(secureUrl);
     } catch {
       setError("Something went wrong while uploading the image");
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    setIsRemoving(true);
+    setError(null);
+
+    try {
+      const result = await removeProfileImage();
+
+      if (!result.success) {
+        setError(result.error ?? "Failed to remove image");
+        return;
+      }
+
+      await authClient.updateUser({ image: null });
+      setPreviewUrl(null);
+    } finally {
+      setIsRemoving(false);
     }
   };
 
@@ -107,7 +135,7 @@ export function ImageDropzone({ name, currentImage }: ImageDropzoneProps) {
           className={cn(
             "flex cursor-pointer items-center gap-4 rounded-md border-2 border-dashed p-4 transition-colors",
             isDragging ? "border-primary bg-accent" : "border-border",
-            isUploading && "pointer-events-none opacity-60",
+            (isUploading || isRemoving) && "pointer-events-none opacity-60",
           )}
         >
           <UserAvatar name={name} image={previewUrl} size="lg" />
@@ -135,6 +163,23 @@ export function ImageDropzone({ name, currentImage }: ImageDropzoneProps) {
             }}
           />
         </div>
+
+        {previewUrl && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRemove();
+            }}
+            disabled={isRemoving || isUploading}
+            className="text-destructive hover:text-destructive"
+          >
+            <X className="h-4 w-4" />
+            {isRemoving ? "Removing..." : "Remove photo"}
+          </Button>
+        )}
 
         {error && <p className="text-destructive text-sm">{error}</p>}
       </div>
