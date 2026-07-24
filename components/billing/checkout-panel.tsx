@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { getPaddleInstance } from "@/lib/paddle/client";
+import { createPaddleInstance } from "@/lib/paddle/client";
 
 interface CheckoutPanelProps {
   priceId: string;
@@ -23,20 +23,14 @@ export function CheckoutPanel({
 
     async function openCheckout() {
       try {
-        const paddleInstance = await getPaddleInstance();
+        const paddleInstance = await createPaddleInstance();
 
-        if (cancelled || !paddleInstance || !containerRef.current) return;
+        if (cancelled || !paddleInstance) return;
 
         paddleInstance.Checkout.open({
           items: [{ priceId, quantity: 1 }],
           customer: { email: userEmail },
           customData: { userId },
-          settings: {
-            displayMode: "inline",
-            frameTarget: containerRef.current.id,
-            frameInitialHeight: 450,
-            frameStyle: "width: 100%; min-height: 450px; border: none;",
-          },
         });
 
         setIsLoading(false);
@@ -60,7 +54,7 @@ export function CheckoutPanel({
         <p className="text-muted-foreground text-sm">Loading checkout...</p>
       )}
       {error && <p className="text-destructive text-sm">{error}</p>}
-      <div id="paddle-checkout-container" ref={containerRef} />
+      <div className="paddle-checkout-container" ref={containerRef} />
     </div>
   );
 }
