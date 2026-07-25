@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import { createPaddleInstance } from "@/lib/paddle/client";
 
 interface CheckoutPanelProps {
@@ -48,12 +49,22 @@ export function CheckoutPanel({
     };
   }, [priceId, userId, userEmail]);
 
+  if (error) {
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-md border border-dashed py-12 text-center">
+        <div className="bg-destructive/10 flex h-10 w-10 items-center justify-center rounded-full">
+          <AlertTriangle className="text-destructive h-5 w-5" />
+        </div>
+        <p className="text-destructive text-sm">{error}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-md border p-4">
       {isLoading && (
         <p className="text-muted-foreground text-sm">Loading checkout...</p>
       )}
-      {error && <p className="text-destructive text-sm">{error}</p>}
       <div className="paddle-checkout-container" ref={containerRef} />
     </div>
   );
