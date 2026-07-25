@@ -17,6 +17,7 @@ import { signUpSchema, type SignUpFormData } from "@/lib/validations/auth";
 import { authClient } from "@/lib/auth-client";
 
 import { ForgotPasswordLink } from "@/components/auth/forgot-password-link";
+import { siteConfig } from "@/config/site";
 
 // TODO:
 // Use shadcn form (clean UI)
@@ -50,7 +51,7 @@ export default function SignUpPage() {
   return (
     <AuthCard
       title="Create an account"
-      description="Start building with SaaS Starter"
+      description={`Start with ${siteConfig.name}`}
     >
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">

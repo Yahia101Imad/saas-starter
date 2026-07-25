@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getSession } from "@/lib/session";
 import { Button } from "@/components/ui/button";
+import { SiteLogo } from "../shared/site-logo";
 
 export async function MarketingNavbar() {
   const session = await getSession();
@@ -9,7 +10,7 @@ export async function MarketingNavbar() {
     <header className="border-b">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link href="/" className="font-semibold">
-          SaaS Starter
+          <SiteLogo />
         </Link>
 
         <nav className="text-muted-foreground hidden items-center gap-6 text-sm md:flex">

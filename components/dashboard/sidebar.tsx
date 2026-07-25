@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { dashboardNavItems } from "./nav-items";
+import { SiteLogo } from "../shared/site-logo";
 
 export function DashboardSidebar() {
   const pathname = usePathname();
@@ -11,7 +12,7 @@ export function DashboardSidebar() {
   return (
     <aside className="bg-background hidden w-64 shrink-0 border-r md:flex md:flex-col">
       <div className="flex h-16 items-center border-b px-6">
-        <span className="text-lg font-semibold">SaaS Starter</span>
+        <SiteLogo />
       </div>
 
       <nav className="flex-1 space-y-1 p-4">
