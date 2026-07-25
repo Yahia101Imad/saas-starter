@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,26 +11,20 @@ import { contactSchema, type ContactFormData } from "@/lib/validations/contact";
 import { submitContactForm } from "@/app/(marketing)/contact/actions";
 
 export function ContactForm() {
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
     defaultValues: { name: "", email: "", message: "" },
   });
 
   const onSubmit = async (values: ContactFormData) => {
-    setServerError(null);
-    setSuccess(false);
-
     const result = await submitContactForm(values);
 
     if (!result.success) {
-      setServerError(result.error ?? "Something went wrong");
+      toast.error(result.error ?? "Something went wrong");
       return;
     }
 
-    setSuccess(true);
+    toast.success("Message sent! We'll get back to you soon.");
     form.reset();
   };
 
@@ -70,13 +64,6 @@ export function ContactForm() {
           </p>
         )}
       </div>
-
-      {serverError && <p className="text-destructive text-sm">{serverError}</p>}
-      {success && (
-        <p className="text-primary text-sm">
-          Message sent! We&apos;ll get back to you soon.
-        </p>
-      )}
 
       <Button type="submit" disabled={form.formState.isSubmitting}>
         {form.formState.isSubmitting ? "Sending..." : "Send message"}

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,8 +21,6 @@ interface ProfileFormProps {
 
 export function ProfileForm({ user }: ProfileFormProps) {
   const router = useRouter();
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const form = useForm<UpdateProfileFormData>({
     resolver: zodResolver(updateProfileSchema),
@@ -29,19 +28,16 @@ export function ProfileForm({ user }: ProfileFormProps) {
   });
 
   const onSubmit = async (values: UpdateProfileFormData) => {
-    setServerError(null);
-    setSuccess(false);
-
     const { error } = await authClient.updateUser({ name: values.name });
 
     if (error) {
-      setServerError(
+      toast.error(
         error.message ?? "Something went wrong while updating your profile",
       );
       return;
     }
 
-    setSuccess(true);
+    toast.success("Profile updated successfully");
     router.refresh();
   };
 
@@ -56,11 +52,6 @@ export function ProfileForm({ user }: ProfileFormProps) {
           </p>
         )}
       </div>
-
-      {serverError && <p className="text-destructive text-sm">{serverError}</p>}
-      {success && (
-        <p className="text-primary text-sm">Profile updated successfully</p>
-      )}
 
       <Button type="submit" disabled={form.formState.isSubmitting}>
         {form.formState.isSubmitting ? "Saving..." : "Save changes"}

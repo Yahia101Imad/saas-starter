@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 import { AuthCard } from "@/components/auth";
 
@@ -24,8 +24,6 @@ export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
-  const [serverError, setServerError] = useState<string | null>(null);
-
   const form = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: { password: "", confirmPassword: "" },
@@ -45,21 +43,20 @@ export default function ResetPasswordPage() {
   }
 
   const onSubmit = async (values: ResetPasswordFormData) => {
-    setServerError(null);
-
     const { error } = await authClient.resetPassword({
       newPassword: values.password,
       token,
     });
 
     if (error) {
-      setServerError(
+      toast.error(
         error.message ??
           "This link may have expired. Please request a new one.",
       );
       return;
     }
 
+    toast.success("Password reset successfully. You can now sign in.");
     router.push("/sign-in");
   };
 
@@ -98,18 +95,6 @@ export default function ResetPasswordPage() {
             </p>
           )}
         </div>
-
-        {serverError && (
-          <div className="space-y-2">
-            <p className="text-destructive text-sm">{serverError}</p>
-            <Link
-              href="/forgot-password"
-              className="text-primary text-sm underline"
-            >
-              Request a new link
-            </Link>
-          </div>
-        )}
 
         <Button className="w-full" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? "Resetting..." : "Reset password"}

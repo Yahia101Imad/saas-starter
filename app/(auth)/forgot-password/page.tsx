@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import {
   ForgotPasswordFormData,
@@ -11,38 +13,34 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// TODO:
-// add "Resend" later, as Mail Provider
-// expected:
-// user add email => click send => click link in mail of reset password page.
-
 export default function ForgotPasswordPage() {
+  const router = useRouter();
+
   const form = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      email: "",
-    },
+    defaultValues: { email: "" },
   });
 
   const onSubmit = async (values: ForgotPasswordFormData) => {
-    const { data, error } = await authClient.requestPasswordReset({
+    const { error } = await authClient.requestPasswordReset({
       email: values.email,
       redirectTo: "/reset-password",
     });
 
     if (error) {
-      console.error(error);
+      toast.error(error.message ?? "Something went wrong. Please try again.");
       return;
     }
 
-    console.log(data, values);
+    toast.success("If an account exists, a reset link has been sent.");
+    form.reset();
   };
+
   return (
     <div className="mx-auto flex min-h-screen max-w-md items-center justify-center px-6">
       <div className="w-full space-y-6">
         <div className="space-y-2 text-center">
           <h1>Forgot password?</h1>
-
           <p className="text-muted-foreground">
             Enter your email and we&apos;ll send you a password reset link.
           </p>
@@ -51,7 +49,6 @@ export default function ForgotPasswordPage() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email">Email</label>
-
             <Input
               id="email"
               type="email"
