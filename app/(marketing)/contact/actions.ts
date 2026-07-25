@@ -2,8 +2,20 @@
 
 import { contactSchema } from "@/lib/validations/contact";
 import { sendEmail } from "@/lib/email/send-email";
+import { contactRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-client-ip";
 
 export async function submitContactForm(values: unknown) {
+  const ip = await getClientIp();
+  const { success } = await contactRateLimit.limit(ip);
+
+  if (!success) {
+    return {
+      success: false,
+      error: "Too many messages sent. Please try again later.",
+    };
+  }
+
   const parsed = contactSchema.safeParse(values);
 
   if (!parsed.success) {
