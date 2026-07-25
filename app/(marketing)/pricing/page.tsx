@@ -1,6 +1,8 @@
+import { Package } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { PricingCard } from "@/components/marketing/pricing-card";
+import { EmptyState } from "@/components/shared/empty-state";
 
 export default async function PricingPage() {
   const [plans, session] = await Promise.all([
@@ -20,11 +22,23 @@ export default async function PricingPage() {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        {plans.map((plan) => (
-          <PricingCard key={plan.id} plan={plan} isAuthenticated={!!session} />
-        ))}
-      </div>
+      {plans.length === 0 ? (
+        <EmptyState
+          icon={Package}
+          title="Pricing coming soon"
+          description="We're finalizing our plans. Check back shortly."
+        />
+      ) : (
+        <div className="grid gap-6 md:grid-cols-3">
+          {plans.map((plan) => (
+            <PricingCard
+              key={plan.id}
+              plan={plan}
+              isAuthenticated={!!session}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
