@@ -3,6 +3,12 @@ import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { PricingCard } from "@/components/marketing/pricing-card";
 import { EmptyState } from "@/components/shared/empty-state";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Pricing",
+  description: "Choose the plan that fits your needs. Cancel anytime.",
+};
 
 export default async function PricingPage() {
   const [plans, session] = await Promise.all([

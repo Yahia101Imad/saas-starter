@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About",
+  description: "Learn more about our mission and what we're building.",
+};
+
 export default function AboutPage() {
   return (
     <section className="mx-auto max-w-3xl px-6 py-20">

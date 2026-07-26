@@ -2,6 +2,14 @@ import type { ReactNode } from "react";
 import { requireAuth } from "@/components/auth/auth-guard";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { UserMenu } from "@/components/dashboard/user-menu";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function DashboardLayout({
   children,

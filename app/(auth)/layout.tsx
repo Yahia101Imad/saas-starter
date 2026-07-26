@@ -2,6 +2,14 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { SiteLogo } from "@/components/shared/site-logo";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 interface AuthLayoutProps {
   children: ReactNode;
