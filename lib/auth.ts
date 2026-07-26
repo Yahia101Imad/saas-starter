@@ -24,10 +24,6 @@ export const auth = betterAuth({
     enabled: true,
 
     sendResetPassword: async ({ user, url }) => {
-      console.log("=== SEND RESET PASSWORD ===");
-      console.log(user.email);
-      console.log(url);
-
       await sendEmail({
         to: user.email,
         subject: "Reset your password",
@@ -48,9 +44,6 @@ export const auth = betterAuth({
         newEmail: string;
         url: string;
       }) => {
-        console.log("=== SEND CHANGE EMAIL VERIFICATION ===");
-        console.log("to:", newEmail);
-        console.log("url:", url);
         await sendEmail({
           to: newEmail,
           subject: "Verify your new email address",
