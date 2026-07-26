@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface UserAvatarProps {
@@ -7,10 +8,10 @@ interface UserAvatarProps {
   className?: string;
 }
 
-const sizeClasses = {
-  sm: "h-9 w-9 text-sm",
-  md: "h-12 w-12 text-base",
-  lg: "h-20 w-20 text-2xl",
+const sizeConfig = {
+  sm: { className: "h-9 w-9 text-sm", px: 36 },
+  md: { className: "h-12 w-12 text-base", px: 48 },
+  lg: { className: "h-20 w-20 text-2xl", px: 80 },
 };
 
 export function UserAvatar({
@@ -19,17 +20,16 @@ export function UserAvatar({
   size = "md",
   className,
 }: UserAvatarProps) {
+  const { className: sizeClassName, px } = sizeConfig[size];
+
   if (image) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={image}
         alt={name}
-        className={cn(
-          "rounded-full object-cover",
-          sizeClasses[size],
-          className,
-        )}
+        width={px}
+        height={px}
+        className={cn("rounded-full object-cover", sizeClassName, className)}
       />
     );
   }
@@ -38,7 +38,7 @@ export function UserAvatar({
     <span
       className={cn(
         "bg-primary text-primary-foreground flex items-center justify-center rounded-full font-medium",
-        sizeClasses[size],
+        sizeClassName,
         className,
       )}
     >
