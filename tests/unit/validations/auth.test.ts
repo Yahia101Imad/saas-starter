@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { signInSchema, signUpSchema } from "./auth";
+import { signInSchema, signUpSchema } from "@/lib/validations/auth";
 
 describe("signInSchema", () => {
   it("accepts valid email and password", () => {
@@ -7,7 +7,6 @@ describe("signInSchema", () => {
       email: "test@example.com",
       password: "password123",
     });
-
     expect(result.success).toBe(true);
   });
 
@@ -16,7 +15,6 @@ describe("signInSchema", () => {
       email: "not-an-email",
       password: "password123",
     });
-
     expect(result.success).toBe(false);
   });
 
@@ -25,7 +23,6 @@ describe("signInSchema", () => {
       email: "test@example.com",
       password: "",
     });
-
     expect(result.success).toBe(false);
   });
 });
@@ -38,7 +35,6 @@ describe("signUpSchema", () => {
       password: "password123",
       confirmPassword: "password123",
     });
-
     expect(result.success).toBe(true);
   });
 
@@ -49,7 +45,6 @@ describe("signUpSchema", () => {
       password: "password123",
       confirmPassword: "different",
     });
-
     expect(result.success).toBe(false);
   });
 
@@ -60,7 +55,6 @@ describe("signUpSchema", () => {
       password: "password123",
       confirmPassword: "password123",
     });
-
     expect(result.success).toBe(false);
   });
 });

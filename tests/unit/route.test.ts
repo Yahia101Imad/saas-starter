@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mapPaddleStatus } from "./route";
+import { mapPaddleStatus } from "@/app/api/webhooks/paddle/route";
 
 describe("mapPaddleStatus", () => {
   it("maps active to ACTIVE", () => {
