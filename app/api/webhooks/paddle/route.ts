@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
-function mapPaddleStatus(
+export function mapPaddleStatus(
   status: string,
 ): "ACTIVE" | "CANCELED" | "PAST_DUE" | "TRIALING" | "INCOMPLETE" | "EXPIRED" {
   switch (status) {
