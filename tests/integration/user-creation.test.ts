@@ -3,7 +3,7 @@ import { testDb } from "../setup/db";
 
 describe("User creation", () => {
   beforeEach(async () => {
-    // تنظيف الجداول قبل كل اختبار لضمان عزل تام
+    // Clean up tables before each test to ensure full isolation
     await testDb.userSettings.deleteMany();
     await testDb.user.deleteMany();
   });
