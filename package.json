@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "dependencies": {
     "@better-auth/prisma-adapter": "^1.6.23",
