@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +20,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -100,6 +101,21 @@ export default function ResetPasswordPage() {
           {form.formState.isSubmitting ? "Resetting..." : "Reset password"}
         </Button>
       </form>
+
+      <p className="text-muted-foreground mt-4 text-center text-sm">
+        Link expired?{" "}
+        <Link href="/forgot-password" className="text-primary hover:underline">
+          Request a new one
+        </Link>
+      </p>
     </AuthCard>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
